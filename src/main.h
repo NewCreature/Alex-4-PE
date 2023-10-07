@@ -23,7 +23,11 @@
 #define _MAIN_H_
 
 #include "allegro.h"
-#include "aldumb.h"
+#ifndef ALT_ALDMB_INCLUDE
+  #include "aldumb.h"
+#else
+  #include "aldumb-legacy.h"
+#endif
 #include "map.h"
 #include "hisc.h"
 #include "actor.h"

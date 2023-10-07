@@ -21,7 +21,11 @@
  
 #include <allegro.h>
 #include <string.h>
-#include <aldumb.h>
+#ifndef ALT_ALDMB_INCLUDE
+	#include <aldumb.h>
+#else
+	#include <aldumb-legacy.h>
+#endif
 
 #include "main.h"
 #include "hisc.h"

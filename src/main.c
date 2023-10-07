@@ -20,7 +20,11 @@
  
  
 #include <allegro.h>
-#include <aldumb.h>
+#ifndef ALT_ALDMB_INCLUDE
+	#include <aldumb.h>
+#else
+	#include <aldumb-legacy.h>
+#endif
 #include <string.h>
 #include <ctype.h>
 
@@ -840,14 +844,16 @@ int init_game(const char *map_file) {
 			i = DIGI_AUTODETECT;
 			log2file("  DIGI_AUTODETECT selected (%d)", i);
 			break;
-		case 2:
-			i = DIGI_DIRECTX(0);
-			log2file("  DIGI_DIRECTX(0) selected (%d)", i);
-			break;
-		case 3:
-			i = DIGI_DIRECTAMX(0);
-			log2file("  DIGI_DIRECTAMX(0) selected (%d)", i);
-			break;
+		#ifdef ALLEGRO_WINDOWS
+			case 2:
+				i = DIGI_DIRECTX(0);
+				log2file("  DIGI_DIRECTX(0) selected (%d)", i);
+				break;
+			case 3:
+				i = DIGI_DIRECTAMX(0);
+				log2file("  DIGI_DIRECTAMX(0) selected (%d)", i);
+				break;
+		#endif
 		default:
 			i = -770405;	// dummy number
 			got_sound = 0;
