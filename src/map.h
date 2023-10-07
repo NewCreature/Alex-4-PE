@@ -80,13 +80,13 @@ typedef struct {
 	char num_enemies;
 	char boss_level;
 	char win_conditions;
-	int width, height;
+	int32_t width, height;
 	Tmappos *dat;
-	int offset_x;
-	int offset_y;
+	int32_t offset_x;
+	int32_t offset_y;
 	DATAFILE *data;
-	int start_x;
-	int start_y;
+	int32_t start_x;
+	int32_t start_y;
 } Tmap;
 
 

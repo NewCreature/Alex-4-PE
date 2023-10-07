@@ -138,8 +138,36 @@ Tmap *load_map_from_memory(void *mem) {
 	
 	// read datastruct
 	// fread(m, sizeof(Tmap), 1, fp);
-	memcpy(m, c, sizeof(Tmap));
-    c += sizeof(Tmap);
+	memcpy(m->name, c, 32);
+	c += 32;
+	memcpy(m->dummy, c, 27);
+	c += 27;
+	m->map_data_needs_to_be_destroyed = *c;
+	c++;
+	m->win_conditions_fullfilled = *c;
+	c++;
+	m->num_enemies = *c;
+	c++;
+	m->boss_level = *c;
+	c++;
+	m->win_conditions = *c;
+	c++;
+	memcpy(&m->width, c, 4);
+	c += 4;
+	memcpy(&m->height, c, 4);
+	c += 4;
+	m->dat = NULL;
+	c += 4;
+	memcpy(&m->offset_x, c, 4);
+	c += 4;
+	memcpy(&m->offset_y, c, 4);
+	c += 4;
+	m->data = NULL;
+	c += 4;
+	memcpy(&m->start_x, c, 4);
+	c += 4;
+	memcpy(&m->start_y, c, 4);
+	c += 4;
 
 	// read map data
 	m->dat = malloc(m->width * m->height * sizeof(Tmappos));
@@ -147,10 +175,19 @@ Tmap *load_map_from_memory(void *mem) {
 		free(m);
 		return NULL;
 	}
+	for(int i = 0; i < m->width * m->height; i++)
+	{
+		m->dat[i].tile = *c;
+		c++;
+		m->dat[i].mask = *c;
+		c++;
+		m->dat[i].type = *c;
+		c++;
+		m->dat[i].item = *c;
+		c++;
+	}
 
 	// fread(m->dat, sizeof(Tmappos), m->width * m->height, fp);
-	memcpy(m->dat, c, sizeof(Tmappos) * m->width * m->height);
-	c += sizeof(Tmappos) * m->width * m->height;
 
 	// close file
 	//fclose(fp);
