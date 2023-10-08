@@ -70,6 +70,9 @@ DATAFILE *maps = NULL;
 DATAFILE *sfx_data = NULL;
 BITMAP *swap_screen;
 #ifdef ALLEGRO_LEGACY
+	ALLEGRO_PATH * highscore_path_a5;
+	ALLEGRO_PATH * save_path_a5;
+	ALLEGRO_PATH * save_path_a5;
 	ALLEGRO_BITMAP * swap_screen_a5 = NULL;
 	ALLEGRO_BITMAP * intermediate_screen_a5 = NULL;
 	int scale_a5 = 1;
@@ -82,6 +85,8 @@ Tscroller hscroll;
 Thisc *hisc_table;
 Thisc *hisc_table_space;
 char working_directory[1024];
+const char * highscore_path = "alex4.hi";
+const char * save_path = "alex4.sav";
 
 // the map
 Tmap *map = NULL;
@@ -697,11 +702,31 @@ int init_game(const char *map_file) {
 		return FALSE;
 	}
 	#ifdef ALLEGRO_LEGACY
-	swap_screen_a5 = al_create_bitmap(swap_screen->w, swap_screen->h);
-	if(!swap_screen_a5)
-	{
-		return FALSE;
-	}
+		swap_screen_a5 = al_create_bitmap(swap_screen->w, swap_screen->h);
+		if(!swap_screen_a5)
+		{
+			return FALSE;
+		}
+		al_set_org_name("tcubedsoftware");
+		al_set_app_name("Alex 4");
+		highscore_path_a5 = al_get_standard_path(ALLEGRO_USER_DATA_PATH);
+		if(highscore_path_a5)
+		{
+			if(al_make_directory(al_path_cstr(highscore_path_a5, '/')))
+			{
+				al_set_path_filename(highscore_path_a5, highscore_path);
+				highscore_path = al_path_cstr(highscore_path_a5, '/');
+			}
+		}
+		save_path_a5 = al_get_standard_path(ALLEGRO_USER_DATA_PATH);
+		if(save_path_a5)
+		{
+			if(al_make_directory(al_path_cstr(save_path_a5, '/')))
+			{
+				al_set_path_filename(save_path_a5, save_path);
+				save_path = al_path_cstr(save_path_a5, '/');
+			}
+		}
 	#endif
 
 	log2file(" allocating memory for high score table 1");
@@ -827,7 +852,7 @@ int init_game(const char *map_file) {
 
 	// load options
 	log2file(" loading options");
-	pf = pack_fopen("alex4.sav", "rp");
+	pf = pack_fopen(save_path, "rp");
 	if (pf) {
 		load_options(&options, pf);
 		pack_fclose(pf);
@@ -839,7 +864,7 @@ int init_game(const char *map_file) {
 
 	// loading highscores
 	log2file(" loading hiscores");
-	pf = pack_fopen("alex4.hi", "rp");
+	pf = pack_fopen(highscore_path, "rp");
 	if (pf) {
 		load_hisc_table(hisc_table, pf);
 		load_hisc_table(hisc_table_space, pf);
@@ -1090,20 +1115,34 @@ void uninit_game() {
 	// only save if everything was inited ok!
 	if (init_ok) {
 		log2file(" saving options");
-		pf = pack_fopen("alex4.sav", "wp");
+		pf = pack_fopen(save_path, "wp");
 		if (pf) {
 			save_options(&options, pf);
 			pack_fclose(pf);
 		}
 		
 		log2file(" saving highscores");
-		pf = pack_fopen("alex4.hi", "wp");
+		printf("high scores: %s\n", highscore_path);
+		pf = pack_fopen(highscore_path, "wp");
 		if (pf) {
 			save_hisc_table(hisc_table, pf);
 			save_hisc_table(hisc_table_space, pf);
 			pack_fclose(pf);
 		}
 	}
+
+	#ifdef ALLEGRO_LEGACY
+		if(highscore_path_a5)
+		{
+			al_destroy_path(highscore_path_a5);
+		}
+		if(save_path_a5)
+		{
+			al_destroy_path(save_path_a5);
+		}
+		al_destroy_bitmap(swap_screen_a5);
+		al_destroy_bitmap(intermediate_screen_a5);
+	#endif
 
 	if (get_config_int("sound", "use_sound_datafile", 1)) {
 		log2file(" unloading sound data");
