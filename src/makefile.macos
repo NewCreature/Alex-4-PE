@@ -1,0 +1,4 @@
+all: ../alex4
+
+../alex4:
+	gcc *.c -O2 -DALT_ALDMB_INCLUDE -o ../alex4 -lalleg -laldmb-legacy -ldumb-legacy `pkg-config --libs --static allegro-static-5` `pkg-config --libs --static allegro_audio-static-5` -framework OpenGL -framework IOKit -framework AudioToolbox -framework OpenAL -framework Cocoa -framework CoreVideo `pkg-config --libs --static allegro_main-static-5`
