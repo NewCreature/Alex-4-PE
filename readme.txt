@@ -19,6 +19,13 @@
  
  
 
+PORTABLE EDITION NOTES
+
+Alex 4 PE is a source port of the original Alex 4 with the goal of making the
+game completely portable and able to run on modern systems. This edition of the
+game also includes some enhancements when built with Allegro Legacy.
+
+
 INTRODUCTION
 
 Nine times out of ten when I start to write a game, I have planned to make a 
