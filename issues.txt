@@ -13,7 +13,7 @@ Alex the Allegator 4 PE Issues
 [ ]Load and save files from/to the correct folders instead of next to the
    executable.
 
-[ ]Add proper 'sharp bilinear' scale to get the framebuffer onto the screen. We
+[X]Add proper 'sharp bilinear' scale to get the framebuffer onto the screen. We
    should create a framebuffer that's a multiple of the internal framebuffer
    size that fits within the 'ALLEGRO_DISPLAY' and scale that up using bilinear
    filtering to fill the display.
@@ -28,5 +28,5 @@ Alex the Allegator 4 PE Issues
 
    [X]Default to full screen mode.
 
-   [ ]Make windowed mode create the largest display that's an integer scale of
+   [X]Make windowed mode create the largest display that's an integer scale of
       the internal resolution that fits within the desktop.
