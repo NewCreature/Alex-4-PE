@@ -1,0 +1,32 @@
+Alex the Allegator 4 PE Issues
+------------------------------
+
+[ ]Fix up all timed loops with proper Allegro Legacy sleep logic.
+
+[ ]Add build scripts for building and packaging.
+
+   [ ]Consider creating a porting toolkit with a similar structure to T3F. This
+      toolkit would let you place the game's data files in the 'bin' folder and
+      its source files in 'src' and just list the files we need to compile in a
+      definitions file that contains information about the project.
+
+[ ]Load and save files from/to the correct folders instead of next to the
+   executable.
+
+[ ]Add proper 'sharp bilinear' scale to get the framebuffer onto the screen. We
+   should create a framebuffer that's a multiple of the internal framebuffer
+   size that fits within the 'ALLEGRO_DISPLAY' and scale that up using bilinear
+   filtering to fill the display.
+
+   [ ]We should have an 'ALLEGRO_BITMAP' that matches the dimensions of
+      'swap_screen'. We'll copy 'swap_screen' here and make a hardware
+      accelerated draw of that to the larger framebuffer.
+   
+   [ ]We need a second 'ALLEGRO_BITMAP' that has bilinear filtering enabled.
+      We'll scale the 'swap_screen' clone onto this one and finally scale it
+      onto the display.
+
+   [ ]Default to full screen mode.
+
+   [ ]Make windowed mode create the largest display that's an integer scale of
+      the internal resolution that fits within the desktop.
