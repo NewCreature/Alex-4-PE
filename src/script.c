@@ -311,10 +311,12 @@ void cmd_drawmap() {
 }
 
 void cmd_fadein() {
+	blit_to_swap(swap_buffer);
 	fade_in_pal(100);
 }
 
 void cmd_fadeout() {
+		blit_to_swap(swap_buffer);
     fade_out_pal(100);
 }
 
@@ -630,6 +632,7 @@ int run_script(char *script, DATAFILE *d) {
 			}
 		}
     }
+	blit_to_swap(swap_buffer);
 
 	// destroy buffers
 	delete_all_objects();

@@ -76,6 +76,7 @@ void new_game(int reset_player_data);
 void new_level(char *fname, int level_id, int draw);
 Tactor *get_alex();
 void draw_frame(BITMAP *bmp, int draw_status_bar);
+void blit_to_swap(BITMAP *bmp);
 void blit_to_screen(BITMAP *bmp);
 void fade_in_pal(int delay);
 void fade_out_pal(int delay);

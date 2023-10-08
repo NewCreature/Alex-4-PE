@@ -72,7 +72,6 @@ BITMAP *swap_screen;
 #ifdef ALLEGRO_LEGACY
 	ALLEGRO_BITMAP * swap_screen_a5 = NULL;
 	ALLEGRO_BITMAP * intermediate_screen_a5 = NULL;
-	ALLEGRO_BITMAP * current_swap_a5 = NULL;
 	int scale_a5 = 1;
 	float scale_factor_a5 = 1.0;
 	int offset_x_a5;
@@ -348,14 +347,14 @@ void fade_rest(int msec, AL_DUH_PLAYER *duh_player) {
 void fade_in_pal(int delay) {
 	set_color(1, &org_pal[3]);	
 	#ifdef ALLEGRO_LEGACY
-		blit_to_screen(current_swap_a5);
+		blit_to_screen(swap_screen);
 	#endif
 	fade_rest(delay, dp);
 
 	set_color(1, &org_pal[2]);	
 	set_color(2, &org_pal[3]);	
 	#ifdef ALLEGRO_LEGACY
-		blit_to_screen(current_swap_a5);
+		blit_to_screen(swap_screen);
 	#endif
 	fade_rest(delay, dp);
 
@@ -363,7 +362,7 @@ void fade_in_pal(int delay) {
 	set_color(2, &org_pal[2]);	
 	set_color(3, &org_pal[3]);
 	#ifdef ALLEGRO_LEGACY
-		blit_to_screen(current_swap_a5);
+		blit_to_screen(swap_screen);
 	#endif
 	fade_rest(delay, dp);
 }
@@ -375,18 +374,18 @@ void fade_out_pal(int delay) {
 	set_color(2, &org_pal[3]);	
 	set_color(3, &org_pal[4]);	
 	#ifdef ALLEGRO_LEGACY
-		blit_to_screen(current_swap_a5);
+		blit_to_screen(swap_screen);
 	#endif
 	fade_rest(delay, dp);
 	set_color(1, &org_pal[3]);	
 	set_color(2, &org_pal[4]);	
 	#ifdef ALLEGRO_LEGACY
-		blit_to_screen(current_swap_a5);
+		blit_to_screen(swap_screen);
 	#endif
 	fade_rest(delay, dp);
 	set_color(1, &org_pal[4]);	
 	#ifdef ALLEGRO_LEGACY
-		blit_to_screen(current_swap_a5);
+		blit_to_screen(swap_screen);
 	#endif
 	fade_rest(delay, dp);
 }
@@ -514,6 +513,11 @@ void load_level_files(const char *filename) {
 }
 
 
+void blit_to_swap(BITMAP *bmp) {
+	if(bmp != swap_screen){
+		stretch_blit(bmp, swap_screen, 0, 0, bmp->w, bmp->h, 0, 0, swap_screen->w, swap_screen->h);
+	}
+}
 
 
 // blits anything to screen
@@ -521,7 +525,6 @@ void blit_to_screen(BITMAP *bmp) {
 	acquire_screen();
 	if (options.use_vsync) vsync();
 	#ifdef ALLEGRO_LEGACY
-		current_swap_a5 = bmp;
 		all_render_a5_bitmap(bmp, swap_screen_a5);
 		al_set_target_bitmap(intermediate_screen_a5);
 		al_draw_scaled_bitmap(swap_screen_a5, 0, 0, al_get_bitmap_width(swap_screen_a5), al_get_bitmap_height(swap_screen_a5), 0, 0, al_get_bitmap_width(intermediate_screen_a5), al_get_bitmap_height(intermediate_screen_a5), 0);
