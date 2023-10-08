@@ -20,6 +20,9 @@
  
  
 #include <allegro.h>
+#ifdef ALLEGRO_LEGACY
+	#include <a5alleg.h>
+#endif
 #ifndef ALT_ALDMB_INCLUDE
 	#include <aldumb.h>
 #else
@@ -2323,6 +2326,9 @@ int play(int level) {
 	while(game_status == GS_OK) {
 
 		//  do logic
+		#ifdef ALLEGRO_LEGACY
+			all_wait_for_int(cycle_counter);
+		#endif
 		while(cycle_count > 0) {
 			logic_count ++;
 
@@ -2445,7 +2451,9 @@ int play(int level) {
 		}
 		
 		// let other processes play
-		yield_timeslice();
+		#ifndef ALLEGRO_LEGACY
+			yield_timeslice();
+		#endif
 
 		// draw 
 		frame_count ++;

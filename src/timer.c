@@ -21,6 +21,9 @@
  
 
 #include "allegro.h"
+#ifdef ALLEGRO_LEGACY
+	#include <a5alleg.h>
+#endif
 #include "timer.h"
 
 // keeps track of frames each second
@@ -56,6 +59,9 @@ int install_timers() {
 	cycle_count = 0;
 	LOCK_FUNCTION(cycle_counter);
 	install_int(cycle_counter, 20);
+	#ifdef ALLEGRO_LEGACY
+		all_adjust_int_speed(cycle_counter, 1.0 / 60.0);
+	#endif
 
 	game_count ++;
 
