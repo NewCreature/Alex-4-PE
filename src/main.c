@@ -662,7 +662,11 @@ int init_game(const char *map_file) {
 	PACKFILE *pf;
 	BITMAP *bmp;
 	int i;
-	int w, h;
+	int w, h, default_w = 640, default_h = 480, fs;
+	#ifdef ALLEGRO_LEGACY
+		ALLEGRO_MONITOR_INFO monitor_info;
+		int w_a5, h_a5;
+	#endif
 
 	log2file("\nInit routines:");
 
@@ -715,20 +719,33 @@ int init_game(const char *map_file) {
 	
 
 	// init gfx
-	if (get_config_int("graphics", "fullscreen", 0)) {
-		w = get_config_int("graphics", "f_width", 640);
-		h = get_config_int("graphics", "f_height", 480);
+	#ifdef ALLEGRO_LEGACY
+		al_get_monitor_info(0, &monitor_info);
+		w_a5 = 160;
+		h_a5 = 120;
+		while(w_a5 * scale_a5 < monitor_info.x2 - monitor_info.x1 && h_a5 * scale_a5 < monitor_info.y2 - monitor_info.y1)
+		{
+			scale_a5++;
+		}
+		scale_a5--;
+		default_w = 160 * scale_a5;
+		default_h = 120 * scale_a5;
+	#endif
+	fs = get_config_int("graphics", "fullscreen", 1);
+	if (fs) {
+		w = get_config_int("graphics", "f_width", default_w);
+		h = get_config_int("graphics", "f_height", default_h);
 	}
 	else {
-		w = get_config_int("graphics", "w_width", 640);
-		h = get_config_int("graphics", "w_height", 480);
+		w = get_config_int("graphics", "w_width", default_w);
+		h = get_config_int("graphics", "w_height", default_h);
 	}
 
 	log2file(" entering gfx mode set in alex4.ini (%dx%d %s)", w, h, (get_config_int("graphics", "fullscreen", 0) ? "full" : "win"));
 
 	#ifdef ALLEGRO_LEGACY
 		all_disable_threaded_display();
-		if(get_config_int("graphics", "fullscreen", 0))
+		if(fs)
 		{
 			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
 		}
@@ -738,10 +755,10 @@ int init_game(const char *map_file) {
 		w, h, 0, 0)) {
 		log2file("  *** failed");
 		log2file(" entering gfx mode (640x480 windowed)");
-		if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0)) {
+		if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, default_w, default_h, 0, 0)) {
 			log2file("  *** failed");
 			log2file(" entering gfx mode (640x480 fullscreen)");
-			if (set_gfx_mode(GFX_AUTODETECT_FULLSCREEN, 640, 480, 0, 0)) {
+			if (set_gfx_mode(GFX_AUTODETECT_FULLSCREEN, default_w, default_h, 0, 0)) {
 				log2file("  *** failed");
 				allegro_message("ALEX4:\nFailed to enter gfx mode.\nTry setting a custom resolution in alex4.ini.");
 				return FALSE;
@@ -749,27 +766,20 @@ int init_game(const char *map_file) {
 		}
 	}
 	#ifdef ALLEGRO_LEGACY
-		w = 160;
-		h = 120;
-		while(w * scale_a5 < al_get_display_width(all_get_display()) && h * scale_a5 < al_get_display_height(all_get_display()))
+		if(w_a5 * scale_a5 >= al_get_display_width(all_get_display()))
 		{
-			scale_a5++;
-		}
-		scale_a5--;
-		if(w * scale_a5 == al_get_display_width(all_get_display()))
-		{
-			scale_factor_a5 = (float)(al_get_display_width(all_get_display())) / (float)(w * scale_a5);
+			scale_factor_a5 = (float)(al_get_display_width(all_get_display())) / (float)(w_a5 * scale_a5);
 			offset_x_a5 = 0;
-			offset_y_a5 = al_get_display_height(all_get_display()) / 2 - ((h * scale_a5) * (scale_factor_a5)) / 2.0;
+			offset_y_a5 = (al_get_display_height(all_get_display())) / 2 - ((h_a5 * scale_a5) * (scale_factor_a5)) / 2.0;
 		}
 		else
 		{
-			scale_factor_a5 = (float)(al_get_display_height(all_get_display())) / (float)(h * scale_a5);
-			offset_x_a5 = al_get_display_width(all_get_display()) / 2 - ((w * scale_a5) * (scale_factor_a5)) / 2.0;
+			scale_factor_a5 = (float)(al_get_display_height(all_get_display())) / (float)(h_a5 * scale_a5);
+			offset_x_a5 = (al_get_display_width(all_get_display())) / 2 - ((w_a5 * scale_a5) * (scale_factor_a5)) / 2.0;
 			offset_y_a5 = 0;
 		}
 		al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
-		intermediate_screen_a5 = al_create_bitmap(w * scale_a5, h * scale_a5);
+		intermediate_screen_a5 = al_create_bitmap(w_a5 * scale_a5, h_a5 * scale_a5);
 		if(!intermediate_screen_a5)
 		{
 			return FALSE;
