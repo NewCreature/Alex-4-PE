@@ -295,6 +295,9 @@ void wait_key(int seconds) {
 	clear_keybuf();
 	cycle_count = 0;
 	while(!kp && t < seconds * 50) {
+		#ifdef ALLEGRO_LEGACY
+			all_wait_for_int(cycle_counter);
+		#endif
 		cycle_count = 0;
 		poll_control(&ctrl);
 		t ++;
@@ -340,10 +343,17 @@ void fade_rest(int msec, AL_DUH_PLAYER *duh_player) {
 	int i = 0;
 
 	while(i < msec / 20) {
+		#ifdef ALLEGRO_LEGACY
+			all_wait_for_int(cycle_counter);
+		#endif
 		cycle_count = 0;
 		if (got_sound && duh_player != NULL) al_poll_duh(duh_player);
 		i ++;
-		while(!cycle_count)	yield_timeslice();
+		while(!cycle_count) {
+			#ifndef ALLEGRO_LEGACY
+				yield_timeslice();
+			#endif
+		}
 	}
 }
 
@@ -1215,6 +1225,9 @@ void show_lets_go() {
 	while(mode != 3) {
 		// do logic
 		while(cycle_count > 0) {
+			#ifdef ALLEGRO_LEGACY
+				all_wait_for_int(cycle_counter);
+			#endif
 			logic_count ++;
 
 			// poll music machine
@@ -1239,7 +1252,9 @@ void show_lets_go() {
 		}
 
 		// let other processes play
-		yield_timeslice();
+		#ifndef ALLEGRO_LEGACY
+			yield_timeslice();
+		#endif
 
 		// draw stuff
 		draw_frame(swap_screen, 1);
@@ -1262,6 +1277,9 @@ void show_game_over() {
 	while(mode != 3) {
 		// do logic
 		while(cycle_count > 0) {
+			#ifdef ALLEGRO_LEGACY
+				all_wait_for_int(cycle_counter);
+			#endif
 			logic_count ++;
 
 			// poll music machine
@@ -1281,7 +1299,9 @@ void show_game_over() {
 		}
 
 		// let other processes play
-		yield_timeslice();
+		#ifndef ALLEGRO_LEGACY
+			yield_timeslice();
+		#endif
 
 		// draw stuff
 		draw_frame(swap_screen, 1);
@@ -1325,6 +1345,9 @@ void show_custom_ending() {
 	while(!done) {
 		// do logic
 		while(cycle_count > 0) {
+			#ifdef ALLEGRO_LEGACY
+				all_wait_for_int(cycle_counter);
+			#endif
 			logic_count ++;
 
 			// poll music machine
@@ -1343,7 +1366,9 @@ void show_custom_ending() {
 		}
 
 		// let other processes play
-		yield_timeslice();
+		#ifndef ALLEGRO_LEGACY
+			yield_timeslice();
+		#endif
 
 		// draw stuff
 		draw_custom_ending(swap_screen);
@@ -1422,6 +1447,9 @@ void show_cutscene(int level) {
 	while(mode != 3) {
 		// do logic
 		while(cycle_count > 0) {
+			#ifdef ALLEGRO_LEGACY
+				all_wait_for_int(cycle_counter);
+			#endif
 			logic_count ++;
 			my_counter ++;
 			poll_control(&ctrl);
@@ -1459,7 +1487,9 @@ void show_cutscene(int level) {
 		}
 
 		// let other processes play
-		yield_timeslice();
+		#ifndef ALLEGRO_LEGACY
+			yield_timeslice();
+		#endif
 
 		// draw stuff
 		blit(swap2, swap_screen, 0, 0, 0, 0, 160, 120);
@@ -1576,6 +1606,9 @@ int select_starting_level() {
 	while(!done) {
 		// do logic
 		while(cycle_count > 0) {
+			#ifdef ALLEGRO_LEGACY
+				all_wait_for_int(cycle_counter);
+			#endif
 			logic_count ++;
 
 			// poll music machine
@@ -2461,6 +2494,9 @@ int play(int level) {
 			all_wait_for_int(cycle_counter);
 		#endif
 		while(cycle_count > 0) {
+			#ifdef ALLEGRO_LEGACY
+				all_wait_for_int(cycle_counter);
+			#endif
 			logic_count ++;
 
 			// poll music machine
@@ -2787,6 +2823,9 @@ int do_main_menu() {
 
 		//  do logic
 		while(cycle_count > 0) {
+			#ifdef ALLEGRO_LEGACY
+				all_wait_for_int(cycle_counter);
+			#endif
 			logic_count ++;
 			tick ++;
 
@@ -2866,7 +2905,9 @@ int do_main_menu() {
 		}
 
 		// let other processes play
-		yield_timeslice();
+		#ifndef ALLEGRO_LEGACY
+			yield_timeslice();
+		#endif
 
 		// draw 
 		frame_count ++;
