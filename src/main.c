@@ -758,7 +758,9 @@ int init_game(const char *map_file) {
 		scale_a5--;
 		if(w * scale_a5 == al_get_display_width(all_get_display()))
 		{
-
+			scale_factor_a5 = (float)(al_get_display_width(all_get_display())) / (float)(w * scale_a5);
+			offset_x_a5 = 0;
+			offset_y_a5 = al_get_display_height(all_get_display()) / 2 - ((h * scale_a5) * (scale_factor_a5)) / 2.0;
 		}
 		else
 		{
