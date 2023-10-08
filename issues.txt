@@ -10,7 +10,7 @@ Alex the Allegator 4 PE Issues
       its source files in 'src' and just list the files we need to compile in a
       definitions file that contains information about the project.
 
-[ ]Load and save files from/to the correct folders instead of next to the
+[X]Load and save files from/to the correct folders instead of next to the
    executable.
 
 [X]Add proper 'sharp bilinear' scale to get the framebuffer onto the screen. We
