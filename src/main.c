@@ -69,6 +69,15 @@ DATAFILE *data = NULL;
 DATAFILE *maps = NULL;
 DATAFILE *sfx_data = NULL;
 BITMAP *swap_screen;
+#ifdef ALLEGRO_LEGACY
+	ALLEGRO_BITMAP * swap_screen_a5 = NULL;
+	ALLEGRO_BITMAP * intermediate_screen_a5 = NULL;
+	ALLEGRO_BITMAP * current_swap_a5 = NULL;
+	int scale_a5 = 1;
+	float scale_factor_a5 = 1.0;
+	int offset_x_a5;
+	int offset_y_a5;
+#endif
 PALETTE org_pal;
 Tscroller hscroll;
 Thisc *hisc_table;
@@ -338,15 +347,24 @@ void fade_rest(int msec, AL_DUH_PLAYER *duh_player) {
 // fades in from white to 4 color palette
 void fade_in_pal(int delay) {
 	set_color(1, &org_pal[3]);	
+	#ifdef ALLEGRO_LEGACY
+		blit_to_screen(current_swap_a5);
+	#endif
 	fade_rest(delay, dp);
 
 	set_color(1, &org_pal[2]);	
 	set_color(2, &org_pal[3]);	
+	#ifdef ALLEGRO_LEGACY
+		blit_to_screen(current_swap_a5);
+	#endif
 	fade_rest(delay, dp);
 
 	set_color(1, &org_pal[1]);	
 	set_color(2, &org_pal[2]);	
-	set_color(3, &org_pal[3]);	
+	set_color(3, &org_pal[3]);
+	#ifdef ALLEGRO_LEGACY
+		blit_to_screen(current_swap_a5);
+	#endif
 	fade_rest(delay, dp);
 }
 
@@ -356,11 +374,20 @@ void fade_out_pal(int delay) {
 	set_color(1, &org_pal[2]);	
 	set_color(2, &org_pal[3]);	
 	set_color(3, &org_pal[4]);	
+	#ifdef ALLEGRO_LEGACY
+		blit_to_screen(current_swap_a5);
+	#endif
 	fade_rest(delay, dp);
 	set_color(1, &org_pal[3]);	
 	set_color(2, &org_pal[4]);	
+	#ifdef ALLEGRO_LEGACY
+		blit_to_screen(current_swap_a5);
+	#endif
 	fade_rest(delay, dp);
 	set_color(1, &org_pal[4]);	
+	#ifdef ALLEGRO_LEGACY
+		blit_to_screen(current_swap_a5);
+	#endif
 	fade_rest(delay, dp);
 }
 
@@ -493,7 +520,18 @@ void load_level_files(const char *filename) {
 void blit_to_screen(BITMAP *bmp) {
 	acquire_screen();
 	if (options.use_vsync) vsync();
-	stretch_blit(bmp, screen, 0, 0, bmp->w, bmp->h, 0, 0, SCREEN_W, SCREEN_H);
+	#ifdef ALLEGRO_LEGACY
+		current_swap_a5 = bmp;
+		all_render_a5_bitmap(bmp, swap_screen_a5);
+		al_set_target_bitmap(intermediate_screen_a5);
+		al_draw_scaled_bitmap(swap_screen_a5, 0, 0, al_get_bitmap_width(swap_screen_a5), al_get_bitmap_height(swap_screen_a5), 0, 0, al_get_bitmap_width(intermediate_screen_a5), al_get_bitmap_height(intermediate_screen_a5), 0);
+		al_set_target_bitmap(al_get_backbuffer(all_get_display()));
+		al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_draw_scaled_bitmap(intermediate_screen_a5, 0, 0, al_get_bitmap_width(intermediate_screen_a5), al_get_bitmap_height(intermediate_screen_a5), offset_x_a5, offset_y_a5, al_get_bitmap_width(intermediate_screen_a5) * scale_factor_a5, al_get_bitmap_height(intermediate_screen_a5) * scale_factor_a5, 0);
+		al_flip_display();
+	#else
+		stretch_blit(bmp, screen, 0, 0, bmp->w, bmp->h, 0, 0, SCREEN_W, SCREEN_H);
+	#endif
 	release_screen();
 }
 
@@ -651,6 +689,13 @@ int init_game(const char *map_file) {
 		allegro_message("ALEX4:\nFailed to allocate memory for swap screen.");
 		return FALSE;
 	}
+	#ifdef ALLEGRO_LEGACY
+	swap_screen_a5 = al_create_bitmap(swap_screen->w, swap_screen->h);
+	if(!swap_screen_a5)
+	{
+		return FALSE;
+	}
+	#endif
 
 	log2file(" allocating memory for high score table 1");
 	hisc_table = make_hisc_table();
@@ -681,6 +726,13 @@ int init_game(const char *map_file) {
 
 	log2file(" entering gfx mode set in alex4.ini (%dx%d %s)", w, h, (get_config_int("graphics", "fullscreen", 0) ? "full" : "win"));
 
+	#ifdef ALLEGRO_LEGACY
+		all_disable_threaded_display();
+		if(get_config_int("graphics", "fullscreen", 0))
+		{
+			al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+		}
+	#endif
     if (set_gfx_mode(
 		(get_config_int("graphics", "fullscreen", 0) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED),
 		w, h, 0, 0)) {
@@ -696,6 +748,31 @@ int init_game(const char *map_file) {
 			}
 		}
 	}
+	#ifdef ALLEGRO_LEGACY
+		w = 160;
+		h = 120;
+		while(w * scale_a5 < al_get_display_width(all_get_display()) && h * scale_a5 < al_get_display_height(all_get_display()))
+		{
+			scale_a5++;
+		}
+		scale_a5--;
+		if(w * scale_a5 == al_get_display_width(all_get_display()))
+		{
+
+		}
+		else
+		{
+			scale_factor_a5 = (float)(al_get_display_height(all_get_display())) / (float)(h * scale_a5);
+			offset_x_a5 = al_get_display_width(all_get_display()) / 2 - ((w * scale_a5) * (scale_factor_a5)) / 2.0;
+			offset_y_a5 = 0;
+		}
+		al_set_new_bitmap_flags(ALLEGRO_MIN_LINEAR | ALLEGRO_MAG_LINEAR);
+		intermediate_screen_a5 = al_create_bitmap(w * scale_a5, h * scale_a5);
+		if(!intermediate_screen_a5)
+		{
+			return FALSE;
+		}
+	#endif
 
 	// show initial loading screen
 	clear(swap_screen);
