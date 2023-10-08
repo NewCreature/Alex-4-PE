@@ -1,7 +1,7 @@
 Alex the Allegator 4 PE Issues
 ------------------------------
 
-[ ]Fix up all timed loops with proper Allegro Legacy sleep logic.
+[X]Fix up all timed loops with proper Allegro Legacy sleep logic.
 
 [ ]Add build scripts for building and packaging.
 
