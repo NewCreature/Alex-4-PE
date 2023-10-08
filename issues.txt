@@ -18,15 +18,15 @@ Alex the Allegator 4 PE Issues
    size that fits within the 'ALLEGRO_DISPLAY' and scale that up using bilinear
    filtering to fill the display.
 
-   [ ]We should have an 'ALLEGRO_BITMAP' that matches the dimensions of
+   [X]We should have an 'ALLEGRO_BITMAP' that matches the dimensions of
       'swap_screen'. We'll copy 'swap_screen' here and make a hardware
       accelerated draw of that to the larger framebuffer.
    
-   [ ]We need a second 'ALLEGRO_BITMAP' that has bilinear filtering enabled.
+   [X]We need a second 'ALLEGRO_BITMAP' that has bilinear filtering enabled.
       We'll scale the 'swap_screen' clone onto this one and finally scale it
       onto the display.
 
-   [ ]Default to full screen mode.
+   [X]Default to full screen mode.
 
    [ ]Make windowed mode create the largest display that's an integer scale of
       the internal resolution that fits within the desktop.
