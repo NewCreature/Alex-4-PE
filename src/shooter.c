@@ -32,7 +32,7 @@
 #include "timer.h"
 #include "shooter.h"
 
-#include "../data/a45.h"
+#include "a45.h"
 
 // data file
 DATAFILE *s_data = NULL;

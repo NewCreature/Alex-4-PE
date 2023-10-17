@@ -27,7 +27,7 @@
 #include "allegro.h"
 #include "map.h"
 #include "timer.h"
-#include "../data/data.h"
+#include "data.h"
 
 
 

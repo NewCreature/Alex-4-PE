@@ -30,7 +30,7 @@
 #include "main.h"
 
 
-#include "../data/data.h"
+#include "data.h"
 
 // pointer to datafile declared in main.c
 extern DATAFILE* data;

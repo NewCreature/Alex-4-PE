@@ -27,7 +27,7 @@
 #include "map.h"
 #include "edit.h"
 #include "timer.h"
-#include "../data/data.h"
+#include "data.h"
 
 // current tile
 int edit_tile = 0;

@@ -46,7 +46,7 @@
 #include "edit.h"
 #include "shooter.h"
 
-#include "../data/data.h"
+#include "data.h"
 
 
 // some game status defines
@@ -675,6 +675,191 @@ void fix_gui_colors() {
 	gui_bg_color = 254;
 }
 
+#ifdef ALLEGRO_LEGACY
+	/* function to ease the burden of having resources located in different places
+	* on different platforms, changes to the directory where it finds the specified
+	* resource */
+	static bool locate_resource(const char * filename)
+	{
+		ALLEGRO_PATH * path;
+		ALLEGRO_PATH * file_path;
+		bool found = false;
+		char * package_name = NULL;
+		char * data_dir = NULL;
+
+		#ifdef T3F_PACKAGE_NAME
+			package_name = T3F_PACKAGE_NAME;
+		#endif
+		#ifdef T3F_APP_DATA_DIR
+			data_dir = T3F_APP_DATA_DIR;
+		#endif
+
+		/* handle Android first so we don't do unnecessary checks */
+		#ifdef ALLEGRO_ANDROID
+
+			int ret;
+
+			path = al_get_standard_path(ALLEGRO_EXENAME_PATH);
+			if(path)
+			{
+				/* try to use PHYSFS to access data */
+				if(PHYSFS_init(al_path_cstr(path, '/')))
+				{
+					ret = PHYSFS_addToSearchPath(al_path_cstr(path, '/'), 1);
+					al_destroy_path(path);
+					if(ret)
+					{
+						al_set_physfs_file_interface();
+						al_change_directory("assets");
+						if(al_filename_exists(filename))
+						{
+							return true;
+						}
+					}
+				}
+			}
+
+			/* if PHYSFS setup failed, use APK file interface instead */
+			al_android_set_apk_file_interface();
+			return true;
+
+		#endif
+
+		/* if we are already in the correct directory */
+		if(al_filename_exists(filename))
+		{
+			return true;
+		}
+
+		/* look in resources path */
+		file_path = al_create_path(filename);
+		if(!file_path)
+		{
+			return false;
+		}
+		path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
+		if(path)
+		{
+			al_append_path_component(path, data_dir);
+			al_join_paths(path, file_path);
+			if(al_filename_exists(al_path_cstr(path, '/')))
+			{
+				found = true;
+			}
+			al_destroy_path(path);
+		}
+		al_destroy_path(file_path);
+		if(found)
+		{
+			path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
+			al_change_directory(al_path_cstr(path, '/'));
+			al_destroy_path(path);
+			return true;
+		}
+
+		/* look in "/usr/share" if a package name is defined */
+		if(package_name)
+		{
+			file_path = al_create_path(filename);
+			if(!file_path)
+			{
+				return false;
+			}
+			path = al_create_path("/usr/share/");
+			if(path)
+			{
+				al_append_path_component(path, package_name);
+				al_join_paths(path, file_path);
+				if(al_filename_exists(al_path_cstr(path, '/')))
+				{
+					al_change_directory(al_path_cstr(path, '/'));
+					found = true;
+				}
+				al_destroy_path(path);
+			}
+			al_destroy_path(file_path);
+		}
+
+		if(found)
+		{
+			path = al_create_path("/usr/share/");
+			if(path)
+			{
+				al_append_path_component(path, package_name);
+				al_change_directory(al_path_cstr(path, '/'));
+				al_destroy_path(path);
+				return true;
+			}
+		}
+
+		/* look in "/usr/share" if a package name is defined */
+		if(package_name)
+		{
+			file_path = al_create_path(filename);
+			if(!file_path)
+			{
+				return false;
+			}
+			path = al_create_path("/usr/local/share/");
+			if(path)
+			{
+				al_append_path_component(path, package_name);
+				al_join_paths(path, file_path);
+				if(al_filename_exists(al_path_cstr(path, '/')))
+				{
+					al_change_directory(al_path_cstr(path, '/'));
+					found = true;
+				}
+				al_destroy_path(path);
+			}
+			al_destroy_path(file_path);
+		}
+
+		if(found)
+		{
+			path = al_create_path("/usr/local/share/");
+			if(path)
+			{
+				al_append_path_component(path, package_name);
+				al_change_directory(al_path_cstr(path, '/'));
+				al_destroy_path(path);
+				return true;
+			}
+		}
+		return false;
+	}
+#endif
+
+static void init_config(void)
+{
+	set_config_file("data/default_alex4.ini");
+	#ifdef ALLEGRO_LEGACY
+		ALLEGRO_PATH * path = al_get_standard_path(ALLEGRO_USER_SETTINGS_PATH);
+		if(path)
+		{
+			if(al_make_directory(al_path_cstr(path, '/')))
+			{
+				al_set_path_filename(path, "alex4.ini");
+				if(!al_filename_exists(al_path_cstr(path, '/')))
+				{
+					ALLEGRO_CONFIG * config;
+					config = al_load_config_file("data/default_alex4.ini");
+					if(config)
+					{
+						al_save_config_file(al_path_cstr(path, '/'), config);
+						al_destroy_config(config);
+					}
+				}
+				if(al_filename_exists(al_path_cstr(path, '/')))
+				{
+					set_config_file(al_path_cstr(path, '/'));
+				}
+				al_destroy_path(path);
+			}
+		}
+#endif
+}
+
 // init the game
 int init_game(const char *map_file) {
 	PACKFILE *pf;
@@ -688,11 +873,16 @@ int init_game(const char *map_file) {
 
 	log2file("\nInit routines:");
 
+	#ifdef ALLEGRO_LEGACY
+		al_set_org_name("tcubedsoftware");
+		al_set_app_name(T3F_APP_TITLE);
+	#endif
+
 	// various allegro things
 	log2file(" initializing allegro");
 	text_mode(-1);
 	garble_string(init_string, 53);
-	set_config_file("alex4.ini");
+	init_config();
 	set_window_close_button(FALSE);
 	
 	// install timers
@@ -712,13 +902,17 @@ int init_game(const char *map_file) {
 		return FALSE;
 	}
 	#ifdef ALLEGRO_LEGACY
+		if(!locate_resource("data/data.dat"))
+		{
+			log2file("  *** failed");
+		}
+		log2file(" setting up A5 swap screen");
 		swap_screen_a5 = al_create_bitmap(swap_screen->w, swap_screen->h);
 		if(!swap_screen_a5)
 		{
+			log2file("  *** failed");
 			return FALSE;
 		}
-		al_set_org_name("tcubedsoftware");
-		al_set_app_name("Alex 4");
 		highscore_path_a5 = al_get_standard_path(ALLEGRO_USER_DATA_PATH);
 		if(highscore_path_a5)
 		{
@@ -3163,9 +3357,11 @@ int main(int argc, char **argv) {
 	allegro_init();
 
 	// get working directory
-	get_executable_name(full_path, 1024);
-	replace_filename(working_directory, full_path, "", 1024);
-	chdir(working_directory);
+	#ifndef ALLEGRO_LEGACY
+		get_executable_name(full_path, 1024);
+		replace_filename(working_directory, full_path, "", 1024);
+		chdir(working_directory);
+	#endif
 
 
 	// start logfile

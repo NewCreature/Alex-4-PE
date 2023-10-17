@@ -28,7 +28,7 @@
 #include "main.h"
 
 
-#include "../data/data.h"
+#include "data.h"
 
 // silly value 
 #define		NO_CHANGE	-3249587

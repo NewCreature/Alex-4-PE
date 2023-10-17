@@ -24,7 +24,7 @@
 #include "bullet.h"
 #include "particle.h"
 #include "timer.h"
-#include "../data/data.h"
+#include "data.h"
 
 
 // sets values on a bullet
