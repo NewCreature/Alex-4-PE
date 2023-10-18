@@ -3,12 +3,7 @@ Alex the Allegator 4 PE Issues
 
 [X]Fix up all timed loops with proper Allegro Legacy sleep logic.
 
-[ ]Add build scripts for building and packaging.
-
-   [ ]Consider creating a porting toolkit with a similar structure to T3F. This
-      toolkit would let you place the game's data files in the 'bin' folder and
-      its source files in 'src' and just list the files we need to compile in a
-      definitions file that contains information about the project.
+[X]Add build scripts for building and packaging.
 
 [X]Load and save files from/to the correct folders instead of next to the
    executable.
